@@ -10,6 +10,19 @@
 ;; $ bb nrepl-server
 ;; then: (cider-connect-clj '(:host "localhost" :port 1667))
 
+;; day 6
+
+(let [in (slurp "inputs/6.txt")
+      unique 4]                         ;  for part 2, change this to 14
+
+  (reduce
+   (fn [seen looking-at]
+     (if (= unique (count (set looking-at)))
+       (reduced seen)
+       (inc seen)))
+   unique
+   (partition unique 1 in)))
+
 ;; day 5
 
 (defn pad [n coll val]
