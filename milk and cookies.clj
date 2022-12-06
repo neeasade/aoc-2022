@@ -10,6 +10,52 @@
 ;; $ bb nrepl-server
 ;; then: (cider-connect-clj '(:host "localhost" :port 1667))
 
+;; day 5
+
+(defn pad [n coll val]
+  (take n (concat coll (repeat val))))
+
+(defn crane-string-to-state [input]
+  (let [lines (->> (string/split-lines input)
+                   (map vec))
+        longest-length (count (last (sort-by count lines)))
+        matrix (map #(pad longest-length % \space) lines)]
+    (->> matrix
+         ;; transpose, then reverse, so numbers are on the right
+         (apply map list)
+         (map reverse)
+         (map (partial apply str))
+         ;; filter to column lines
+         (filter (partial re-find #"^[0-9]"))
+         (map string/trim)
+         ;; drop the label
+         (map (partial drop 1))
+         (map vec)
+         (into []))))
+
+(let [in (slurp "inputs/5_example.txt")
+      [crane moves] (string/split in #"\n\n")
+      crane (crane-string-to-state crane)
+      moves (->> moves
+                 (re-seq #"[0-9]+")
+                 (map read-string)
+                 (partition 3)
+                 (map (fn [[amount from to]]
+                        [amount (dec from) (dec to)])))]
+
+  (->> moves
+       (reduce (fn [crane [amount from to]]
+                 (-> crane
+                     (update from (fn [stack] (vec (drop-last amount stack))))
+                     (update to (fn [stack]
+                                  (let [from-stack (get crane from)
+                                        ;; for part 2, just remove the reverse
+                                        contents (reverse (take-last amount from-stack))]
+                                    (into [] (apply conj stack contents)))))))
+               crane)
+       (map last)
+       (apply str)))
+
 ;; day 4
 
 (let [in (slurp "inputs/4.txt")
