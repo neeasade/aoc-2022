@@ -10,6 +10,32 @@
 ;; $ bb nrepl-server
 ;; then: (cider-connect-clj '(:host "localhost" :port 1667))
 
+;; day 4
+
+(let [in (slurp "inputs/4.txt")
+      number-strings (-> in
+                         (string/replace #"\n" ",")
+                         (string/split #"[-,]"))
+      pairs (->> number-strings
+                 (map read-string)
+                 (partition 2)
+                 (map (fn [[start end]] (range start (inc end))))
+                 (map set)
+                 (partition 2))]
+
+  ;; part 1
+  (->> pairs
+       (filter (fn [[s1 s2]]
+                 (or (= s1 (set/intersection s1 s2))
+                     (= s2 (set/intersection s1 s2)))))
+       count)
+
+  ;; part 2
+  (->> pairs
+       (remove (fn [[s1 s2]]
+                 (= #{} (set/intersection s1 s2))))
+       count))
+
 ;; day 3
 
 (defn char-to-priority [c]
