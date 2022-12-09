@@ -10,6 +10,37 @@
 ;; $ bb nrepl-server
 ;; then: (cider-connect-clj '(:host "localhost" :port 1667))
 
+;; day 7
+
+(let [in (slurp "inputs/7_example.txt")
+      commands (re-seq #"\$ (cd|ls) ?([^\n]+)?([^\$]+)?" in)]
+  (reduce (fn [[pwd dirs] [_ command arg output]]
+            (prn pwd command arg)
+            (condp = command
+              "ls" (let [items (string/split-lines output)
+                         files (->> items
+                                    (remove #(string/starts-with? % "dir"))
+                                    (map #(string/split % #" "))
+                                    (drop 1)
+                                    ;; (map (fn [f] (let [[size name] (string/split f #" ")] [size name])))
+                                    )]
+
+                     ;; (prn dirs pwd files)
+                     ;; (prn (update-in dirs pwd (constantly files)))
+                     [pwd (update-in dirs (vec (conj pwd ".")) (constantly files))])
+              ;; [pwd dirs]
+              "cd" (if (= arg "..")
+                     [(vec (drop-last 1 pwd)) dirs]
+                     [(vec (conj pwd arg)) dirs])
+              ;; (println command)
+              nil
+              ))
+          [[] {}]
+          commands)
+  ;; commands
+  ;; (last commands)
+  )
+
 ;; day 6
 
 (let [in (slurp "inputs/6.txt")
